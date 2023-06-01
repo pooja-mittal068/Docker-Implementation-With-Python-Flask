@@ -1,0 +1,160 @@
+1. What is docker
+2. What are containers
+3. Containers vs Virtual Machines 
+4. Docker image vs Container
+5. Practical implementation of dockers
+
+----------------------------------------------------------
+Docker image vs Container:
+
+Docker image:
+- Package or artifact
+- We can Move or share this artifact
+- very small size
+
+
+Container:
+- A way to package application with all the necessary dependencies and configuration
+- Portable artifact - easy to share and move this package to any environment
+- Makes development and deployment more easy and efficient and in sink
+- combination of layers of images
+- application - dependencies and configuration
+- container contains dependencies as a image and combine them
+- All layers of images are called Docker image 
+
+Docker image -> Run -> Create container (Environment to run the application) -> start the application
+----------------------------------------------------------------------
+
+Containers vs Virtual Machines:
+
+Layers:
+hardware -> os kernel -> application
+
+Vm is a complete seperate subsystem which will be installed in the host os. VM has its own os kernel and communication with the hardware.
+whenever we install vm we need to assign some amount of resources from the system like hardware, RAM seperately to the VM
+
+Docker images is just on the application layer and will be able to communication with os kernel.
+
+- Docker image size is usually smaller
+- Docker container start and run much faster 
+
+Compatibility:
+- We can install VM on any os.
+- In case of docker images we may find a compatibility issue
+if we are using windows machine and want to install docker images that are of linux then we may find a compatibility issue.
+- Although this compatibility issue is resolved in latest update of docker, now we can install linux image in windows machine that are above windows 10
+------------------------------------------------------------------------------------------------
+
+System requirements to run Docker on windows:
+
+enable virtualization:
+enable Hyper-V
+
+Run as administrator
+wsl --install
+ 
+then restart the system
+
+windows 10 or 11
+
+For lower version of windows we need docker toolbox but it is deprecated now.
+
+So To run docker on lower versions we need to install VM with windows 11 then on vm run docker.
+
+--------------------------------------------------------------------------------------------
+
+Docker commands:
+
+docker pull <docker image name> 
+
+docker build -t <docker image name> .
+
+docker run -d -p 80:80 docker/getting-started(<docker image name>)
+
+docker images
+
+docker ps
+
+docker stop <container ID>
+
+docker image rm <Image ID>
+
+docker image rm -f <Image ID>
+
+We can run multiple containers on the same port but the local host port should be different always
+-----------------------------------------------------------------------------------------------------
+
+Importance of 0.0.0.0 IP address:
+
+app.run(debug=True,host="0.0.0.0",port=5000)
+
+Here we have used 0.0.0.0 IP address. It can access our local address also and local host address also
+
+So my ipaddress is 192.168.1.4. It can access my local IP address and local host address also
+
+we can run the app on these addesses, will give the same result:
+
+http://127.0.0.1:5000/
+http://192.168.1.4:5000/
+http://localhost:5000/
+--------------------------------------------
+Dockerfile:
+
+FROM baseImage
+
+The lower base image should be a linux operating system
+
+COPY . /app     
+# Here . indicate local repository, This will create a app folder along with all the project files inside the docker image
+
+------------------------------------------------------------
+
+Build Docker Image:
+docker build -t welcome-app .
+
+docker run -p 5000:5000 welcome-app
+
+Running on http://127.0.0.1:5000 - We can access it from our host container through a specific port, this is our localhost address
+Running on http://172.17.0.2:5000 - we can't access this as this is the IP present in docker container
+
+---------------------------------------------------
+Delete the docker image welcome-app and build again 
+
+docker build -t poojamittal068/welcome-app .
+
+Rename the Docker image:
+- docker tag poojamittal068/welcome-app poojamittal068/welcome-app1
+
+Push Docker image to docker hub repository:
+- docker push poojamittal068/welcome-app:latest
+
+- This latest shows the tag over there, will be useful when we have to create more versions of the docker image
+
+Pull Docker image from docker hub repository:
+- docker pull poojamittal068/welcome-app:latest
+
+--------------------------------------------------------------------------------------
+Docker compose:
+
+- Docker compose is a tool for defining and running multi container docker applications.
+
+- We will create a file dockercompose.yaml and define all the configuration in it to run as a multicontainer and all the application will be able to communicate with each other.
+
+Redis - redis is used for caching purpose to improve the website performance
+
+
+
+EXPOSE 5000:
+- port no which will be exposed from the container, inside the container this 5000 port will be exposed to the host environment
+
+docker-compose.yml:
+web: This is basically going to create a web service and this web service is going to use the docker file of a specific application.
+build: . - This will create build from the root path
+services: The entire "web" service in this is for our current Dockerfile of the web application, this will run the Dockerfile. In services one image of web will created and seperate image of redis will get created and image for mysql will get created.
+
+----------------------------------------------------------
+
+Run docker-compose.yml file:
+docker compose up
+
+This will also run the Dockerfile.
